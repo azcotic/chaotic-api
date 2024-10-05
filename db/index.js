@@ -81,7 +81,12 @@ function getModel(type) {
  * @returns {String} Type of card
  */
 function getType(path) {
-    const type = path.split('/').pop().split('.')[0];
+    let type;
+    if (process.platform === 'win32') {
+        type = path.split('\\').pop().split('.')[0];
+    } else {
+        type = path.split('/').pop().split('.')[0];
+    }
     return type || '';
 }
 
@@ -94,7 +99,6 @@ async function runImport(path) {
     const Model = getModel(type);
 
     const data = await getData(path);
-
     if (type && Model) {
         Model.insertMany(data, { ordered: false}, (err, docs) => {
             if (err) {
@@ -108,7 +112,7 @@ async function runImport(path) {
 }
 
 function establishConnection() {
-    const url = process.env.DATABASE_URL;
+    const url = "mongodb://localhost/chaotic";
     const user = process.env.DATABASE_USER;
     const pass = process.env.DATABASE_PASS;
 
@@ -138,6 +142,7 @@ async function main() {
             console.log('Connected to Database'); 
             
             const files = await getFiles();
+            console.log(files)
             files.forEach(path => runImport(path));
         })
 
